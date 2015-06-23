@@ -56,7 +56,13 @@ class TestSolvers(BaseTest):
 
             x = Variable(2, 2)
             expr = inv_pos(x)
-            prob = Problem(Minimize(expr[0,0]), [x == [[1,2],[3,4]] ])
+            target = Constant([[1,1.0/2],[1.0/3,1.0/4]])
+            # for i in range(2):
+            #     for j in range(2):
+            #         prob = Problem(Minimize(expr[i,j]), [x == [[1,2],[3,4]] ])
+            #         prob.solve(solver=ELEMENTAL, verbose=False)
+            #         self.assertAlmostEqual(prob.value, target[i,j].value)
+
+            prob = Problem(Minimize(expr[1,0]), [x == [[1,2],[3,4]] ])
             prob.solve(solver=ELEMENTAL, verbose=False)
-            # Constant([[1,1.0/2],[1.0/3,1.0/4]])),
-            self.assertAlmostEqual(prob.value, 1)
+            self.assertAlmostEqual(prob.value, target[1,0].value)

@@ -223,7 +223,6 @@ class Solver(object):
         data[s.C], data[s.OFFSET] = matrix_data.get_objective()
         data[s.A], data[s.B] = matrix_data.get_eq_constr()
         data[s.G], data[s.H] = matrix_data.get_ineq_constr()
-        data[s.F] = matrix_data.get_nonlin_constr()
         data[s.DIMS] = sym_data.dims.copy()
         bool_idx, int_idx = self._noncvx_id_to_idx(data[s.DIMS],
                                                    sym_data.var_offsets,

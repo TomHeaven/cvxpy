@@ -65,6 +65,8 @@ class MatrixData(object):
         The matrix interface to use for creating the constraints matrix.
     vec_intf : interface
         The matrix interface to use for creating the constant vector.
+    nonlin_constr : constraint objects
+        A list of nonlinear constraints.
     """
 
     def __init__(self, sym_data, matrix_intf, vec_intf, solver):
@@ -80,6 +82,7 @@ class MatrixData(object):
         # Separate constraints based on the solver being used.
         constr_types = solver.split_constr(self.sym_data.constr_map)
         eq_constr, ineq_constr, nonlin_constr = constr_types
+        self.nonlin_constr = nonlin_constr
         # Equaliy constraints.
         self.eq_cache = self._init_matrix_cache(eq_constr,
                                                 self.sym_data.x_length)
@@ -88,8 +91,6 @@ class MatrixData(object):
         self.ineq_cache = self._init_matrix_cache(ineq_constr,
                                                   self.sym_data.x_length)
         self._lin_matrix(self.ineq_cache, caching=True)
-        # Nonlinear constraints.
-        self.F = self._nonlin_matrix(nonlin_constr)
 
     def _dummy_constr(self):
         """Returns a dummy constraint for the objective.
@@ -116,10 +117,10 @@ class MatrixData(object):
         """
         return self._cache_to_matrix(self.ineq_cache)
 
-    def get_nonlin_constr(self):
+    def get_nonlin_constr(self, quad_obj, y_len):
         """Returns the oracle function for the nonlinear constraints.
         """
-        return self.F
+        return self._nonlin_matrix(quad_obj, y_len, self.nonlin_constr)
 
     def _init_matrix_cache(self, constraints, x_length):
         """Initializes the data structures for the cached matrix.
@@ -246,13 +247,17 @@ class MatrixData(object):
                     I.extend(block.row + vert_start)
                     J.extend(block.col + horiz_offset)
 
-    def _nonlin_matrix(self, nonlin_constr):
+    def _nonlin_matrix(self, quad_obj, y_len, nonlin_constr):
         """Returns an oracle for the nonlinear constraints.
 
         The oracle computes the combined function value, gradient, and Hessian.
 
         Parameters
         ----------
+        quad_obj : cvxopt spmatrix
+            A quadratic objective (1/2)x^TPx.
+        y_len : int
+            The added variables for the regularized problem.
         nonlin_constr : list
             A list of nonlinear constraints represented as oracle functions.
 

@@ -35,7 +35,7 @@ class CVXOPT(Solver):
     LP_CAPABLE = True
     SOCP_CAPABLE = True
     SDP_CAPABLE = True
-    EXP_CAPABLE = True
+    EXP_CAPABLE = False
     MIP_CAPABLE = False
 
     # Map of CVXOPT status to CVXPY status.
@@ -43,6 +43,10 @@ class CVXOPT(Solver):
                   'primal infeasible': s.INFEASIBLE,
                   'dual infeasible': s.UNBOUNDED,
                   'unknown': s.SOLVER_ERROR}
+
+    # Primal and dual regularization.
+    REG_PRIMAL = 1e-8
+    REG_DUAL = 1e-8
 
     def name(self):
         """The name of the solver.
@@ -79,6 +83,70 @@ class CVXOPT(Solver):
         """
         return (constr_map[s.EQ], constr_map[s.LEQ], constr_map[s.EXP])
 
+    def get_problem_data(self, objective, constraints, cached_data):
+        """Returns the argument for the call to the solver.
+
+        Parameters
+        ----------
+        objective : LinOp
+            The canonicalized objective.
+        constraints : list
+            The list of canonicalized cosntraints.
+        cached_data : dict
+            A map of solver name to cached problem data.
+
+        Returns
+        -------
+        dict
+            The arguments needed for the solver.
+        """
+        sym_data = self.get_sym_data(objective, constraints, cached_data)
+        matrix_data = self.get_matrix_data(objective, constraints,
+                                           cached_data)
+        data = {}
+        data[s.C], data[s.OFFSET] = matrix_data.get_objective()
+        data[s.A], data[s.B] = matrix_data.get_eq_constr()
+        data[s.G], data[s.H] = matrix_data.get_ineq_constr()
+        data[s.DIMS] = sym_data.dims.copy()
+        bool_idx, int_idx = self._noncvx_id_to_idx(data[s.DIMS],
+                                                   sym_data.var_offsets,
+                                                   sym_data.var_sizes)
+        data[s.BOOL_IDX] = bool_idx
+        data[s.INT_IDX] = int_idx
+        # Solve min (reg_primal/2)*x^Tx + c^Tx + (1/2)y^Ty
+        # subject to  Ax + reg_dual*y = b
+        #             Gx + s = h, s in K.
+        # Instead of the original problem so that A and G are full rank.
+        import cvxopt
+        reg_primal = self.REG_PRIMAL
+        reg_dual = self.REG_DUAL
+        x_len = data[s.C].size[0]
+        y_len = data[s.B].size[0]
+        data[s.P] = self.matrix_intf().identity(x_len + y_len)
+        for i in range(x_len):
+            data[s.P][i, i] = reg_primal
+        # Modify c.
+        c = self.vec_intf().zeros(x_len + y_len, 1)
+        c[:x_len] = data[s.C]
+        data[s.C] = c
+        # Modify A.
+        nnz = data[s.A].I.size[0]
+        V = cvxopt.matrix(reg_dual, (nnz + y_len, 1), tc='d')
+        V[:nnz] = data[s.A].V
+        I = cvxopt.matrix(0, (nnz + y_len, 1), tc='i')
+        I[:nnz] = data[s.A].I
+        I[nnz:] = range(y_len)
+        J = cvxopt.matrix(0, (nnz + y_len, 1), tc='i')
+        J[:nnz] = data[s.A].J
+        J[nnz:] = range(x_len, x_len+y_len)
+        data[s.A] = cvxopt.spmatrix(V, I, J, (y_len, x_len+y_len), tc='d')
+        # Modify G.
+        data[s.G] = cvxopt.spmatrix(data[s.G].V, data[s.G].I, data[s.G].J,
+            (data[s.G].size[0], x_len + y_len), tc='d')
+        # Quadratic objective P.
+        data[s.F] = matrix_data.get_nonlin_constr(data[s.P], y_len)
+        return data
+
     def solve(self, objective, constraints, cached_data,
               warm_start, verbose, solver_opts):
         """Returns the result of the call to the solver.
@@ -105,28 +173,13 @@ class CVXOPT(Solver):
         """
         import cvxopt, cvxopt.solvers
         data = self.get_problem_data(objective, constraints, cached_data)
-        # Save old data in case need to use robust solver.
-        old_data = {
-                s.DIMS: data[s.DIMS],
-                s.A: data[s.A],
-                s.B: data[s.B],
-                s.G: data[s.G],
-                s.H: data[s.H],
-                s.F: data[s.F],
-            }
-        data[s.DIMS] = copy.deepcopy(data[s.DIMS])
+
         # User chosen KKT solver option.
         kktsolver = self.get_kktsolver_opt(solver_opts)
-        # Cannot have redundant rows unless using robust LDL kktsolver.
-        if kktsolver != s.ROBUST_KKTSOLVER:
-            # Will detect infeasibility.
-            if self.remove_redundant_rows(data) == s.INFEASIBLE:
-                return {s.STATUS: s.INFEASIBLE}
         # Save original cvxopt solver options.
         old_options = cvxopt.solvers.options.copy()
         # Silence cvxopt if verbose is False.
         cvxopt.solvers.options["show_progress"] = verbose
-
         # Apply any user-specific options.
         # Rename max_iters to maxiters.
         if "max_iters" in solver_opts:
@@ -141,9 +194,22 @@ class CVXOPT(Solver):
         try:
             # Target cvxopt clp if nonlinear constraints exist.
             if data[s.DIMS][s.EXP_DIM]:
-                results_dict = self.cpl_solve(data, kktsolver)
+                results_dict = cvxopt.solvers.cp(data[s.F],
+                                                 data[s.G],
+                                                 data[s.H],
+                                                 data[s.DIMS],
+                                                 data[s.A],
+                                                 data[s.B],
+                                                 kktsolver=kktsolver)
             else:
-                results_dict = self.conelp_solve(data, kktsolver)
+                results_dict = cvxopt.solvers.coneqp(data[s.P],
+                                                     data[s.C],
+                                                     data[s.G],
+                                                     data[s.H],
+                                                     data[s.DIMS],
+                                                     data[s.A],
+                                                     data[s.B],
+                                                     kktsolver=kktsolver)
         # Catch exceptions in CVXOPT and convert them to solver errors.
         except ValueError:
             results_dict = {"status": "unknown"}
@@ -152,156 +218,86 @@ class CVXOPT(Solver):
         self._restore_solver_options(old_options)
         return self.format_results(results_dict, data, cached_data)
 
-    def cpl_solve(self, data, kktsolver):
-        """Solve using the cpl solver.
+    # @staticmethod
+    # def remove_redundant_rows(data):
+    #     """Remove redundant constraints from A and G.
 
-        Parameters
-        ----------
-        data : dict
-            All the problem data.
-        kktsolver : The kktsolver to use.
-        robust : Use the robust kktsolver?
+    #     Parameters
+    #     ----------
+    #     data : dict
+    #         All the problem data.
 
-        Returns
-        -------
-        dict
-            The solver output.
+    #     Returns
+    #     -------
+    #     str
+    #         A status indicating if infeasibility was detected.
+    #     """
+    #     dims = data[s.DIMS]
+    #     # Convert A, b, G, h to scipy sparse matrices and numpy 1D arrays.
+    #     A = intf.DEFAULT_SPARSE_INTF.const_to_matrix(data[s.A],
+    #         convert_scalars=True)
+    #     G = intf.DEFAULT_SPARSE_INTF.const_to_matrix(data[s.G],
+    #         convert_scalars=True)
+    #     b = intf.DEFAULT_NP_INTF.const_to_matrix(data[s.B],
+    #         convert_scalars=True)
+    #     h = intf.DEFAULT_NP_INTF.const_to_matrix(data[s.H],
+    #         convert_scalars=True)
+    #     # Remove redundant rows in A.
+    #     if A.shape[0] > 0:
+    #         # The pivoting improves robustness.
+    #         Q, R, P = scipy.linalg.qr(A.todense(), pivoting=True)
+    #         rows_to_keep = []
+    #         for i in range(R.shape[0]):
+    #             if np.linalg.norm(R[i,:]) > 1e-10:
+    #                 rows_to_keep.append(i)
+    #         R = R[rows_to_keep,:]
+    #         Q = Q[:, rows_to_keep]
+    #         # Invert P from col -> var to var -> col.
+    #         Pinv = np.zeros(P.size, dtype='int')
+    #         for i in range(P.size):
+    #             Pinv[P[i]] = i
+    #         # Rearrage R.
+    #         R = R[:,Pinv]
+    #         A = R
+    #         b_old = b
+    #         b = Q.T.dot(b)
+    #         # If b is not in the range of Q,
+    #         # the problem is infeasible.
+    #         if not np.allclose(b_old, Q.dot(b)):
+    #             return s.INFEASIBLE
+    #         dims[s.EQ_DIM] = b.shape[0]
+    #         data["Q"] = intf.CVXOPT_DENSE_INTF.const_to_matrix(Q,
+    #             convert_scalars=True)
 
-        Raises
-        ------
-        ValueError
-            If CVXOPT fails.
-        """
-        import cvxopt, cvxopt.solvers
-        if kktsolver == s.ROBUST_KKTSOLVER:
-            # Get custom kktsolver.
-            kktsolver = get_kktsolver(data[s.G],
-                                      data[s.DIMS],
-                                      data[s.A],
-                                      data[s.F])
-        return cvxopt.solvers.cpl(data[s.C],
-                                  data[s.F],
-                                  data[s.G],
-                                  data[s.H],
-                                  data[s.DIMS],
-                                  data[s.A],
-                                  data[s.B],
-                                  kktsolver=kktsolver)
-
-    def conelp_solve(self, data, kktsolver):
-        """Solve using the conelp solver.
-
-        Parameters
-        ----------
-        data : dict
-            All the problem data.
-        kktsolver : The kktsolver to use.
-        robust : Use the robust kktsolver?
-
-        Returns
-        -------
-        dict
-            The solver output.
-
-        Raises
-        ------
-        ValueError
-            If CVXOPT fails.
-        """
-        import cvxopt, cvxopt.solvers
-        if kktsolver == s.ROBUST_KKTSOLVER:
-            # Get custom kktsolver.
-            kktsolver = get_kktsolver(data[s.G],
-                                      data[s.DIMS],
-                                      data[s.A])
-        return cvxopt.solvers.conelp(data[s.C],
-                                     data[s.G],
-                                     data[s.H],
-                                     data[s.DIMS],
-                                     data[s.A],
-                                     data[s.B],
-                                     kktsolver=kktsolver)
-
-    @staticmethod
-    def remove_redundant_rows(data):
-        """Remove redundant constraints from A and G.
-
-        Parameters
-        ----------
-        data : dict
-            All the problem data.
-
-        Returns
-        -------
-        str
-            A status indicating if infeasibility was detected.
-        """
-        dims = data[s.DIMS]
-        # Convert A, b, G, h to scipy sparse matrices and numpy 1D arrays.
-        A = intf.DEFAULT_SPARSE_INTF.const_to_matrix(data[s.A],
-            convert_scalars=True)
-        G = intf.DEFAULT_SPARSE_INTF.const_to_matrix(data[s.G],
-            convert_scalars=True)
-        b = intf.DEFAULT_NP_INTF.const_to_matrix(data[s.B],
-            convert_scalars=True)
-        h = intf.DEFAULT_NP_INTF.const_to_matrix(data[s.H],
-            convert_scalars=True)
-        # Remove redundant rows in A.
-        if A.shape[0] > 0:
-            # The pivoting improves robustness.
-            Q, R, P = scipy.linalg.qr(A.todense(), pivoting=True)
-            rows_to_keep = []
-            for i in range(R.shape[0]):
-                if np.linalg.norm(R[i,:]) > 1e-10:
-                    rows_to_keep.append(i)
-            R = R[rows_to_keep,:]
-            Q = Q[:, rows_to_keep]
-            # Invert P from col -> var to var -> col.
-            Pinv = np.zeros(P.size, dtype='int')
-            for i in range(P.size):
-                Pinv[P[i]] = i
-            # Rearrage R.
-            R = R[:,Pinv]
-            A = R
-            b_old = b
-            b = Q.T.dot(b)
-            # If b is not in the range of Q,
-            # the problem is infeasible.
-            if not np.allclose(b_old, Q.dot(b)):
-                return s.INFEASIBLE
-            dims[s.EQ_DIM] = b.shape[0]
-            data["Q"] = intf.CVXOPT_DENSE_INTF.const_to_matrix(Q,
-                convert_scalars=True)
-
-        # Remove obviously redundant rows in G's <= constraints.
-        if dims[s.LEQ_DIM] > 0:
-            G = G.tocsr()
-            G_leq = G[:dims[s.LEQ_DIM],:]
-            h_leq = h[:dims[s.LEQ_DIM]]
-            G_other = G[dims[s.LEQ_DIM]:,:]
-            h_other = h[dims[s.LEQ_DIM]:]
-            G_leq, h_leq, P_leq = compress_matrix(G_leq, h_leq)
-            dims[s.LEQ_DIM] = h_leq.shape[0]
-            data["P_leq"] = intf.CVXOPT_SPARSE_INTF.const_to_matrix(P_leq,
-                convert_scalars=True)
-            # Scipy 0.13 can't stack empty arrays.
-            if G_leq.shape[0] > 0 and G_other.shape[0] > 0:
-                G = sp.vstack([G_leq, G_other])
-            elif G_leq.shape[0] > 0:
-                G = G_leq
-            else:
-                G = G_other
-            h = np.vstack([h_leq, h_other])
-        # Convert A, b, G, h to CVXOPT matrices.
-        data[s.A] = intf.CVXOPT_SPARSE_INTF.const_to_matrix(A,
-            convert_scalars=True)
-        data[s.G] = intf.CVXOPT_SPARSE_INTF.const_to_matrix(G,
-            convert_scalars=True)
-        data[s.B] = intf.CVXOPT_DENSE_INTF.const_to_matrix(b,
-            convert_scalars=True)
-        data[s.H] = intf.CVXOPT_DENSE_INTF.const_to_matrix(h,
-            convert_scalars=True)
-        return s.OPTIMAL
+    #     # Remove obviously redundant rows in G's <= constraints.
+    #     if dims[s.LEQ_DIM] > 0:
+    #         G = G.tocsr()
+    #         G_leq = G[:dims[s.LEQ_DIM],:]
+    #         h_leq = h[:dims[s.LEQ_DIM]]
+    #         G_other = G[dims[s.LEQ_DIM]:,:]
+    #         h_other = h[dims[s.LEQ_DIM]:]
+    #         G_leq, h_leq, P_leq = compress_matrix(G_leq, h_leq)
+    #         dims[s.LEQ_DIM] = h_leq.shape[0]
+    #         data["P_leq"] = intf.CVXOPT_SPARSE_INTF.const_to_matrix(P_leq,
+    #             convert_scalars=True)
+    #         # Scipy 0.13 can't stack empty arrays.
+    #         if G_leq.shape[0] > 0 and G_other.shape[0] > 0:
+    #             G = sp.vstack([G_leq, G_other])
+    #         elif G_leq.shape[0] > 0:
+    #             G = G_leq
+    #         else:
+    #             G = G_other
+    #         h = np.vstack([h_leq, h_other])
+    #     # Convert A, b, G, h to CVXOPT matrices.
+    #     data[s.A] = intf.CVXOPT_SPARSE_INTF.const_to_matrix(A,
+    #         convert_scalars=True)
+    #     data[s.G] = intf.CVXOPT_SPARSE_INTF.const_to_matrix(G,
+    #         convert_scalars=True)
+    #     data[s.B] = intf.CVXOPT_DENSE_INTF.const_to_matrix(b,
+    #         convert_scalars=True)
+    #     data[s.H] = intf.CVXOPT_DENSE_INTF.const_to_matrix(h,
+    #         convert_scalars=True)
+    #     return s.OPTIMAL
 
     @staticmethod
     def _restore_solver_options(old_options):

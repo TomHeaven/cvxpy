@@ -40,7 +40,7 @@ SOLVER_TO_TOL = {SCS: 1e-1,
                  ECOS: 1e-5,
                  CVXOPT: 1e-4,
                  ROBUST_CVXOPT: 1e-4}
-SOLVERS_TO_TRY = [ECOS, SCS, CVXOPT, ROBUST_CVXOPT]
+SOLVERS_TO_TRY = [ECOS, SCS, CVXOPT]
 # Test elemental if installed.
 if ELEMENTAL in installed_solvers():
     SOLVERS_TO_TRY.append(ELEMENTAL)
