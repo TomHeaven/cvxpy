@@ -191,6 +191,8 @@ class Atom(Expression):
     # Ensures both inputs and outputs are the correct matrix types.
     @staticmethod
     def numpy_numeric(numeric_func):
+        # TODO cast to a matrix at the end.
+        return numeric_func
         def new_numeric(self, values):
             interface = intf.DEFAULT_INTF
             values = [interface.const_to_matrix(v, convert_scalars=False)
