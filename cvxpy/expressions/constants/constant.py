@@ -23,6 +23,7 @@ import cvxpy.settings as s
 from cvxpy.expressions.leaf import Leaf
 import cvxpy.lin_ops.lin_utils as lu
 import numpy as np
+import pandas as pd
 
 class Constant(Leaf):
     """
@@ -33,7 +34,17 @@ class Constant(Leaf):
         # A fix for c.T*x where c is a 1D array.
         self.is_1D_array = False
         # Keep sparse matrices sparse.
-        if intf.is_sparse(value):
+        self._index = None
+        self._columns = None
+        if isinstance(value, pd.DataFrame):
+            self._index = value.index
+            self._columns = value.columns
+            self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
+        elif isinstance(value, pd.Series):
+            self._index = value.index
+            self.is_1D_array = True
+            self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
+        elif intf.is_sparse(value):
             self._value = intf.DEFAULT_SPARSE_INTF.const_to_matrix(value)
             self._sparse = True
         else:
@@ -74,6 +85,18 @@ class Constant(Leaf):
         """Returns the (row, col) dimensions of the expression.
         """
         return self._size
+
+    @property
+    def index(self):
+        """Returns the index of the expression (or None).
+        """
+        return self._index
+
+    @property
+    def columns(self):
+        """Returns the column index of the expression (or None).
+        """
+        return self._columns
 
     def is_positive(self):
         """Is the expression positive?

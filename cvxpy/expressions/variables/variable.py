@@ -22,15 +22,26 @@ from ... import utilities as u
 from ..leaf import Leaf
 import cvxpy.lin_ops.lin_utils as lu
 import scipy.sparse as sp
+import pandas as pd ## TODO do optional import
 
 class Variable(Leaf):
     """ The base variable class """
     # name - unique identifier.
     # rows - variable height.
     # cols - variable width.
-    def __init__(self, rows=1, cols=1, name=None):
+    # index - labels of rows
+    # columns - labels of columns
+    def __init__(self, rows=1, cols=1, index=None, columns=None, name=None):
         self._rows = rows
         self._cols = cols
+        self._index = index
+        self._columns = columns
+        if index is not None:
+            self._rows = len(index)
+            self._index = pd.Index(index)
+        if columns is not None:
+            self._cols = len(columns)
+            self._columns = pd.Index(columns)
         self.id = lu.get_id()
         if name is None:
             self._name = "%s%d" % (s.VAR_PREFIX, self.id)
@@ -55,10 +66,22 @@ class Variable(Leaf):
         """
         return (self._rows, self._cols)
 
+    @property
+    def index(self):
+        """Returns the index of the expression (or None).
+        """
+        return self._index
+
+    @property
+    def columns(self):
+        """Returns the column index of the expression (or None).
+        """
+        return self._columns
+
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.
         """
-        return [self._rows, self._cols, self._name]
+        return [self._rows, self._cols, self.index, self.columns, self._name]
 
     def name(self):
         return self._name
@@ -107,4 +130,5 @@ class Variable(Leaf):
     def __repr__(self):
         """String to recreate the object.
         """
-        return "Variable(%d, %d)" % self.size
+        ## TODO if we use this format, propagate to subclasses of Variable
+        return "Variable%s" % self._repr_index()

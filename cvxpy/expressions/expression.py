@@ -86,12 +86,26 @@ class Expression(u.Canonical):
         """
         return self.name()
 
+    def _repr_index(self):
+        """String with size or index information.
+        """
+        result = "("
+        if self.index is None:
+            result += "rows=%d, " % self.size[0]
+        else:
+            result += "index=%s, " % self.index
+        if self.columns is None:
+            result += "cols=%d)" % self.size[1]
+        else:
+            result += "columns=%s)" % self.columns
+        return result
+
     def __repr__(self):
         """Returns a string with information about the expression.
         """
         return "Expression(%s, %s, %s)" % (self.curvature,
                                            self.sign,
-                                           self.size)
+                                           self._repr_index())
 
     @abc.abstractmethod
     def name(self):
@@ -186,6 +200,18 @@ class Expression(u.Canonical):
     @abc.abstractproperty
     def size(self):
         """Returns the (row, col) dimensions of the expression.
+        """
+        return NotImplemented
+
+    @abc.abstractproperty
+    def index(self):
+        """Returns the index of the expression (or None).
+        """
+        return NotImplemented
+
+    @abc.abstractproperty
+    def columns(self):
+        """Returns the columns index of the expression (or None).
         """
         return NotImplemented
 

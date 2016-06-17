@@ -46,6 +46,7 @@ class Atom(Expression):
         self.args = [Atom.cast_to_const(arg) for arg in args]
         self.validate_arguments()
         self._size = self.size_from_args()
+        self._index, self._columns = self.index_from_args()
 
     def name(self):
         """Returns the string representation of the function call.
@@ -67,6 +68,14 @@ class Atom(Expression):
     @property
     def size(self):
         return self._size
+
+    @property
+    def index(self):
+        return self._index
+
+    @property
+    def columns(self):
+        return self._columns
 
     @abc.abstractmethod
     def sign_from_args(self):

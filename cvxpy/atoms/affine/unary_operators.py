@@ -44,6 +44,11 @@ class NegExpression(UnaryOperator):
         """
         return self.args[0].size
 
+    def index_from_args(self):
+        """Returns the (row, col) size of the expression.
+        """
+        return (self.args[0].index, self.args[0].columns)
+
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.
         """

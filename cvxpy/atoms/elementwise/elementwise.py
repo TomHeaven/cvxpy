@@ -38,12 +38,19 @@ class Elementwise(Atom):
         """
         return u.shape.sum_shapes([arg.size for arg in self.args])
 
+    def index_from_args(self):
+        """Index is the same as the sum of the arguments.
+        """
+        return u.index.sum_indexes([(arg.index, arg.columns) 
+                                    for arg in self.args])
+
     def validate_arguments(self):
         """
         Verify that all the shapes are the same
-        or can be promoted.
+        or can be promoted, and all indexes match.
         """
         u.shape.sum_shapes([arg.size for arg in self.args])
+        self.index_from_args()
 
     @staticmethod
     def elemwise_grad_to_diag(value, rows, cols):
