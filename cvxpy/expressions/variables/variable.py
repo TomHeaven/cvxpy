@@ -40,6 +40,8 @@ class Variable(Leaf):
             self._rows = len(index)
             self._index = pd.Index(index)
         if columns is not None:
+            if self.index is None:
+                raise SyntaxError("Variables with columns must have index.")
             self._cols = len(columns)
             self._columns = pd.Index(columns)
         self.id = lu.get_id()
@@ -90,6 +92,23 @@ class Variable(Leaf):
         """Save the value of the primal variable.
         """
         self.primal_value = value
+
+    def as_series(self):
+        """Returns representation of the variable as pandas Series.
+        """
+        if self.index is None:
+            raise SyntaxError("Variable has no index")
+        if self.columns is not None:
+            raise SyntaxError("Variable has columns, use as_dataframe()")
+        return pd.Series(index=self.index, data=self.value)
+
+    def as_dataframe(self):
+        """Returns representation of the variable as pandas DataFrame.
+        """
+        if self.columns is None:
+            raise SyntaxError("Variable has no column index.")
+        return pd.DataFrame(index=self.index, 
+            columns=self.columns, data=self.value)
 
     @property
     def value(self):

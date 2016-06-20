@@ -279,6 +279,11 @@ class geo_mean(Atom):
         """
         return (1, 1)
 
+    def index_from_args(self):
+        """Returns the (row, col) size of the expression.
+        """
+        return (None, None)
+
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.
         """

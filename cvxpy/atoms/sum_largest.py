@@ -68,6 +68,11 @@ class sum_largest(Atom):
         """
         return (1, 1)
 
+    def index_from_args(self):
+        """Returns the index and column index of the expression.
+        """
+        return (None, None)
+
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.
         """
