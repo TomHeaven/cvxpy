@@ -21,6 +21,7 @@ import abc
 from cvxpy.expressions import expression
 import cvxpy.interface as intf
 import numpy as np
+import pandas as pd # TODO : global import check
 
 
 class Leaf(expression.Expression):
@@ -60,6 +61,65 @@ class Leaf(expression.Expression):
         """
         # Default is full domain.
         return []
+
+    def _size_index_from_args(self, rows, cols, index, columns):
+        """
+        Size and index for user-defined expressions (variables, parameters)
+
+        Parameters
+        ----------
+        rows : number of rows of the expression
+        cols : number of columns of the expression
+        index : pandas row index, or None
+        columns : pandas column index, or None
+
+        Returns
+        -------
+
+        """
+        self._rows = rows
+        self._cols = cols
+        self._index = index
+        self._columns = columns
+
+        if index is not None:
+            self._rows = len(index)
+            self._index = pd.Index(index)
+        if columns is not None:
+            if self._index is None:
+                raise SyntaxError("Variables with pandas columns must have index.")
+            self._cols = len(columns)
+            self._columns = pd.Index(columns)
+
+    @property
+    def index(self):
+        """Returns the index of the expression (or None).
+        """
+        return self._index
+
+    @property
+    def columns(self):
+        """Returns the column index of the expression (or None).
+        """
+        return self._columns
+
+    def as_series(self):
+        """Returns representation of the leaf as pandas Series.
+        """
+        if self.index is None:
+            raise SyntaxError("%s has no index" % self.__class__.__name__)
+        if self.columns is not None:
+            raise SyntaxError("%s has columns, use .as_dataframe()" % self.__class__.__name__)
+        return pd.Series(index=self.index, data=self.value)
+
+    def as_dataframe(self):
+        """Returns representation of the leaf as pandas DataFrame.
+        """
+        if self.columns is None:
+            raise SyntaxError("%s has no column index." % self.__class__.__name__)
+        return pd.DataFrame(index=self.index,
+                            columns=self.columns, data=self.value)
+
 
     def _validate_value(self, val):
         """Check that the value satisfies the leaf's symbolic attributes.

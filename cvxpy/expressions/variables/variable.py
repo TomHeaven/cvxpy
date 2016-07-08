@@ -22,28 +22,18 @@ from ... import utilities as u
 from ..leaf import Leaf
 import cvxpy.lin_ops.lin_utils as lu
 import scipy.sparse as sp
-import pandas as pd ## TODO do optional import
+
 
 class Variable(Leaf):
     """ The base variable class """
+
     # name - unique identifier.
     # rows - variable height.
     # cols - variable width.
     # index - labels of rows
     # columns - labels of columns
-    def __init__(self, rows=1, cols=1, index=None, columns=None, name=None):
-        self._rows = rows
-        self._cols = cols
-        self._index = index
-        self._columns = columns
-        if index is not None:
-            self._rows = len(index)
-            self._index = pd.Index(index)
-        if columns is not None:
-            if self.index is None:
-                raise SyntaxError("Variables with columns must have index.")
-            self._cols = len(columns)
-            self._columns = pd.Index(columns)
+    def __init__(self, rows=1, cols=1, name=None, index=None, columns=None):
+        self._size_index_from_args(rows, cols, index, columns)
         self.id = lu.get_id()
         if name is None:
             self._name = "%s%d" % (s.VAR_PREFIX, self.id)
@@ -68,18 +58,6 @@ class Variable(Leaf):
         """
         return (self._rows, self._cols)
 
-    @property
-    def index(self):
-        """Returns the index of the expression (or None).
-        """
-        return self._index
-
-    @property
-    def columns(self):
-        """Returns the column index of the expression (or None).
-        """
-        return self._columns
-
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.
         """
@@ -92,23 +70,6 @@ class Variable(Leaf):
         """Save the value of the primal variable.
         """
         self.primal_value = value
-
-    def as_series(self):
-        """Returns representation of the variable as pandas Series.
-        """
-        if self.index is None:
-            raise SyntaxError("Variable has no index")
-        if self.columns is not None:
-            raise SyntaxError("Variable has columns, use as_dataframe()")
-        return pd.Series(index=self.index, data=self.value)
-
-    def as_dataframe(self):
-        """Returns representation of the variable as pandas DataFrame.
-        """
-        if self.columns is None:
-            raise SyntaxError("Variable has no column index.")
-        return pd.DataFrame(index=self.index, 
-            columns=self.columns, data=self.value)
 
     @property
     def value(self):
@@ -130,7 +91,7 @@ class Variable(Leaf):
         Returns:
             A map of variable to SciPy CSC sparse matrix or None.
         """
-        return {self: sp.eye(self.size[0]*self.size[1]).tocsc()}
+        return {self: sp.eye(self.size[0] * self.size[1]).tocsc()}
 
     def variables(self):
         """Returns itself as a variable.
@@ -149,5 +110,4 @@ class Variable(Leaf):
     def __repr__(self):
         """String to recreate the object.
         """
-        ## TODO if we use this format, propagate to subclasses of Variable
-        return "Variable%s" % self._repr_index()
+        return "%s(%s)" % (self.__class__.__name__, self._repr_size_index())

@@ -28,10 +28,9 @@ class Parameter(Leaf):
     A parameter, either matrix or scalar.
     """
     PARAM_COUNT = 0
-    def __init__(self, rows=1, cols=1, name=None, sign="unknown", value=None):
+    def __init__(self, rows=1, cols=1, name=None, sign="unknown", value=None, index=None, columns=None):
         self.id = lu.get_id()
-        self._rows = rows
-        self._cols = cols
+        self._size_index_from_args(rows, cols, index, columns)
         self._sign_str = sign
         if name is None:
             self._name = "%s%d" % (s.PARAM_PREFIX, self.id)
@@ -104,6 +103,6 @@ class Parameter(Leaf):
     def __repr__(self):
         """String to recreate the object.
         """
-        return 'Parameter(%d, %d, sign="%s")' % (self._rows,
-                                                 self._cols,
+        return '%s(%s, sign="%s")' % (self.__class__.__name__,
+                                         self._repr_size_index(),
                                                  self.sign)

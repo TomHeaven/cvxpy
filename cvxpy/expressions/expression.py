@@ -86,18 +86,18 @@ class Expression(u.Canonical):
         """
         return self.name()
 
-    def _repr_index(self):
+    def _repr_size_index(self):
         """String with size or index information.
         """
-        result = "("
+        result = ""
         if self.index is None:
             result += "rows=%d, " % self.size[0]
         else:
             result += "index=%s, " % self.index
         if self.columns is None:
-            result += "cols=%d)" % self.size[1]
+            result += "cols=%d" % self.size[1]
         else:
-            result += "columns=%s)" % self.columns
+            result += "columns=%s" % self.columns
         return result
 
     def __repr__(self):

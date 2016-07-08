@@ -24,9 +24,9 @@ class CallbackParam(Parameter):
     A parameter whose value is obtained by evaluating a function.
     """
     PARAM_COUNT = 0
-    def __init__(self, callback, rows=1, cols=1, name=None, sign="unknown"):
+    def __init__(self, callback, rows=1, cols=1, name=None, sign="unknown", index=None, columns=None):
         self._callback = callback
-        super(CallbackParam, self).__init__(rows, cols, name, sign)
+        super(CallbackParam, self).__init__(rows, cols, name, sign, index, columns)
 
     @property
     def value(self):
