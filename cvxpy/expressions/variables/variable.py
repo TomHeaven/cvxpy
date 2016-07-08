@@ -32,8 +32,8 @@ class Variable(Leaf):
     # cols - variable width.
     # index - labels of rows
     # columns - labels of columns
-    def __init__(self, rows=1, cols=1, name=None, index=None, columns=None):
-        self._size_index_from_args(rows, cols, index, columns)
+    def __init__(self, rows=1, cols=1, name=None):
+        self._size_index_from_args(rows, cols)
         self.id = lu.get_id()
         if name is None:
             self._name = "%s%d" % (s.VAR_PREFIX, self.id)

@@ -21,7 +21,7 @@ import abc
 from cvxpy.expressions import expression
 import cvxpy.interface as intf
 import numpy as np
-import pandas as pd # TODO : global import check
+import pandas as pd  # TODO : global import check
 
 
 class Leaf(expression.Expression):
@@ -62,34 +62,39 @@ class Leaf(expression.Expression):
         # Default is full domain.
         return []
 
-    def _size_index_from_args(self, rows, cols, index, columns):
+    def _size_index_from_args(self, rows, cols):
         """
         Size and index for user-defined expressions (variables, parameters)
 
         Parameters
         ----------
-        rows : number of rows of the expression
-        cols : number of columns of the expression
-        index : pandas row index, or None
-        columns : pandas column index, or None
+        rows : number of rows of the expression, or iterable for pandas indexing
+        cols : number of columns of the expression, or iterable for pandas indexing
 
         Returns
         -------
 
         """
-        self._rows = rows
-        self._cols = cols
-        self._index = index
-        self._columns = columns
-
-        if index is not None:
-            self._rows = len(index)
-            self._index = pd.Index(index)
-        if columns is not None:
-            if self._index is None:
-                raise SyntaxError("Variables with pandas columns must have index.")
-            self._cols = len(columns)
-            self._columns = pd.Index(columns)
+        if isinstance(rows, (int, long)):
+            self._rows = rows
+            self._index = None
+            if isinstance(cols, (int, long)):
+                self._cols = cols
+                self._columns = None
+            else:
+                raise SyntaxError("Only integer columns are compatible with integer rows.")
+        else:
+            self._index = pd.Index(rows)
+            self._rows = len(self._index)
+            if isinstance(cols, (int, long)):
+                if cols == 1:
+                    self._cols = 1
+                    self._columns = None
+                else:
+                    raise SyntaxError("Only single or indexed columns are compatible with indexed rows.")
+            else:
+                self._columns = pd.Index(cols)
+                self._cols = len(self._columns)
 
     @property
     def index(self):
@@ -120,7 +125,6 @@ class Leaf(expression.Expression):
         return pd.DataFrame(index=self.index,
                             columns=self.columns, data=self.value)
 
-
     def _validate_value(self, val):
         """Check that the value satisfies the leaf's symbolic attributes.
 
@@ -147,7 +151,7 @@ class Leaf(expression.Expression):
             # Otherwise value sign must match declared sign.
             pos_val, neg_val = intf.sign(val)
             if self.is_positive() and not pos_val or \
-               self.is_negative() and not neg_val:
+                            self.is_negative() and not neg_val:
                 raise ValueError(
                     "Invalid sign for %s value." % self.__class__.__name__
                 )

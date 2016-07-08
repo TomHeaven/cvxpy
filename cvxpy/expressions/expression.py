@@ -93,11 +93,11 @@ class Expression(u.Canonical):
         if self.index is None:
             result += "rows=%d, " % self.size[0]
         else:
-            result += "index=%s, " % self.index
+            result += "rows=%s, " % self.index
         if self.columns is None:
             result += "cols=%d" % self.size[1]
         else:
-            result += "columns=%s" % self.columns
+            result += "cols=%s" % self.columns
         return result
 
     def __repr__(self):
@@ -105,7 +105,7 @@ class Expression(u.Canonical):
         """
         return "Expression(%s, %s, %s)" % (self.curvature,
                                            self.sign,
-                                           self._repr_index())
+                                           self._repr_size_index())
 
     @abc.abstractmethod
     def name(self):
@@ -231,6 +231,7 @@ class Expression(u.Canonical):
         return self.size[0] > 1 and self.size[1] > 1
 
     def __getitem__(self, key):
+        ## TODO implement pandas slicing
         """Return a slice/index into the expression.
         """
         # Returning self for scalars causes
