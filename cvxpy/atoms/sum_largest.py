@@ -18,13 +18,15 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
 import cvxpy.interface as intf
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.atoms.affine.sum_entries import sum_entries
 import numpy as np
 import scipy.sparse as sp
 
-class sum_largest(Atom):
+
+class sum_largest(ScalarAtom):
     """Sum of the largest k values in the matrix X.
     """
     def __init__(self, x, k):
@@ -62,16 +64,6 @@ class sum_largest(Atom):
         D = np.zeros((self.args[0].size[0]*self.args[0].size[1], 1))
         D[indices] = 1
         return [sp.csc_matrix(D)]
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
-
-    def index_from_args(self):
-        """Returns the index and column index of the expression.
-        """
-        return (None, None)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

@@ -19,6 +19,8 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
+
 from cvxpy.atoms.affine.index import index
 from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.constraints.semidefinite import SDP
@@ -26,7 +28,7 @@ from scipy import linalg as LA
 import numpy as np
 import scipy.sparse as sp
 
-class lambda_max(Atom):
+class lambda_max(ScalarAtom):
     """ Maximum eigenvalue; :math:`\lambda_{\max}(A)`.
 
     """
@@ -73,11 +75,6 @@ class lambda_max(Atom):
         if not self.args[0].size[0] == self.args[0].size[1]:
             raise ValueError("The argument '%s' to lambda_max must resolve to a square matrix."
                 % self.args[0].name())
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

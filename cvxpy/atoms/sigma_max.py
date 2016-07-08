@@ -19,6 +19,7 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
 from cvxpy.atoms.affine.index import index
 from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.constraints.semidefinite import SDP
@@ -26,7 +27,7 @@ import scipy.sparse as sp
 from numpy import linalg as LA
 import numpy as np
 
-class sigma_max(Atom):
+class sigma_max(ScalarAtom):
     """ Maximum singular value. """
     def __init__(self, A):
         super(sigma_max, self).__init__(A)
@@ -54,11 +55,6 @@ class sigma_max(Atom):
         ds[0] = 1
         D = U.dot(np.diag(ds)).dot(V)
         return [sp.csc_matrix(D.ravel(order='F')).T]
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

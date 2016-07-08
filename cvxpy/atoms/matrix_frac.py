@@ -19,6 +19,7 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
 from cvxpy.atoms.affine.index import index
 from cvxpy.atoms.affine.transpose import transpose
 from cvxpy.constraints.semidefinite import SDP
@@ -26,7 +27,7 @@ from numpy import linalg as LA
 import numpy as np
 import scipy.sparse as sp
 
-class matrix_frac(Atom):
+class matrix_frac(ScalarAtom):
     """ tr X.T*P^-1*X """
     def __init__(self, X, P):
         super(matrix_frac, self).__init__(X, P)
@@ -91,11 +92,6 @@ class matrix_frac(Atom):
             raise ValueError(
                 "The arguments to matrix_frac have incompatible dimensions."
             )
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

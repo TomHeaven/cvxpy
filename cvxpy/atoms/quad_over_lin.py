@@ -18,6 +18,7 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
 import cvxpy.utilities as u
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.constraints.second_order import SOC
@@ -25,7 +26,7 @@ import numpy as np
 import scipy.sparse as sp
 import scipy as scipy
 
-class quad_over_lin(Atom):
+class quad_over_lin(ScalarAtom):
     """ :math:`(sum_{ij}X^2_{ij})/y`
 
     """
@@ -67,11 +68,6 @@ class quad_over_lin(Atom):
             DX = np.reshape(DX, (self.args[0].size[0]*self.args[0].size[1], 1))
             DX = scipy.sparse.csc_matrix(DX)
             return [DX, Dy]
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

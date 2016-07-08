@@ -19,6 +19,7 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
 from cvxpy.atoms.elementwise.log import log
 from cvxpy.atoms.affine.index import index
 from cvxpy.atoms.affine.transpose import transpose
@@ -28,7 +29,7 @@ import numpy as np
 from numpy import linalg as LA
 import scipy.sparse as sp
 
-class log_det(Atom):
+class log_det(ScalarAtom):
     """:math:`\log\det A`
 
     """
@@ -53,11 +54,6 @@ class log_det(Atom):
         n, m = self.args[0].size
         if n != m:
             raise TypeError("The argument to log_det must be a square matrix." )
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

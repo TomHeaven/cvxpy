@@ -17,16 +17,18 @@ You should have received a copy of the GNU General Public License
 along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import cvxpy.lin_ops.lin_utils as lu
-from cvxpy.atoms.atom import Atom
-from cvxpy.atoms.affine.index import index
-from cvxpy.atoms.affine.transpose import transpose
-from cvxpy.constraints.semidefinite import SDP
-import scipy.linalg
 import numpy as np
+import scipy.linalg
 import scipy.sparse as sp
 
-class normNuc(Atom):
+import cvxpy.lin_ops.lin_utils as lu
+from cvxpy.atoms.affine.index import index
+from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
+from cvxpy.constraints.semidefinite import SDP
+
+
+class normNuc(ScalarAtom):
     """ Sum of the singular values. """
     def __init__(self, A):
         super(normNuc, self).__init__(A)
@@ -52,11 +54,6 @@ class normNuc(Atom):
         U, _, V = np.linalg.svd(values[0])
         D = U.dot(V)
         return [sp.csc_matrix(D.A.ravel(order='F')).T]
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

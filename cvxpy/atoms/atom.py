@@ -65,6 +65,12 @@ class Atom(Expression):
         """
         return NotImplemented
 
+    @abc.abstractmethod
+    def index_from_args(self):
+        """Returns the index and columns index of the expression.
+        """
+        return NotImplemented
+
     @property
     def size(self):
         return self._size

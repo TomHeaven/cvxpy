@@ -17,17 +17,17 @@ You should have received a copy of the GNU General Public License
 along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-from cvxpy.atoms.atom import Atom
-from cvxpy.atoms.affine.index import index
 import numpy as np
 import scipy.sparse as sp
-import numbers
 
-from ..utilities.power_tools import fracify, decompose, approx_error, lower_bound, over_bound, prettydict, gm, gm_constrs
 import cvxpy.lin_ops.lin_utils as lu
+from cvxpy.atoms.affine.index import index
+from cvxpy.atoms.atom import Atom
+from cvxpy.atoms.scalar_atom import ScalarAtom
+from ..utilities.power_tools import fracify, decompose, approx_error, lower_bound, over_bound, prettydict, gm_constrs
 
 
-class geo_mean(Atom):
+class geo_mean(ScalarAtom):
     """ The (weighted) geometric mean of vector ``x``, with optional powers given by ``p``:
 
     .. math::
@@ -273,16 +273,6 @@ class geo_mean(Atom):
 
     def pretty_tree(self):
         print(prettydict(self.tree))
-
-    def size_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (1, 1)
-
-    def index_from_args(self):
-        """Returns the (row, col) size of the expression.
-        """
-        return (None, None)
 
     def sign_from_args(self):
         """Returns sign (is positive, is negative) of the expression.

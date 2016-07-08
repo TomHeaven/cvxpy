@@ -18,10 +18,12 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy.atoms.affine.affine_atom import AffAtom
+from cvxpy.atoms.scalar_atom import ScalarAtom
 import cvxpy.lin_ops.lin_utils as lu
 import numpy as np
 
-class trace(AffAtom):
+
+class trace(AffAtom, ScalarAtom):
     """The sum of the diagonal entries of a matrix.
 
     Attributes
@@ -45,11 +47,6 @@ class trace(AffAtom):
         rows, cols = self.args[0].size
         if not rows == cols:
             raise ValueError("Argument to trace must be a square matrix.")
-
-    def size_from_args(self):
-        """Always scalar.
-        """
-        return (1, 1)
 
     @staticmethod
     def graph_implementation(arg_objs, size, data=None):
