@@ -40,25 +40,26 @@ def sum_indexes(indexs_columns):
         if not column.equals(columns[0]):
             raise ValueError(
                 "Incompatible column indexes")
+    # TODO implement dynamic reindexing
     return (None if len(indexes) == 0 else indexes[0], 
             None if len(columns) == 0 else columns[0])
 
 def mul_indexes(lh_indexes, rh_indexes):
-    return NotImplemented
-    """Give the shape resulting from multiplying two shapes.
+    """Give the columns and row index resulting from multiplying
+    two column and row indexes.
 
     Args:
-        lh_shape: A (row, col) tuple.
-        rh_shape: A (row, col) tuple.
+        lh_indexes: A (index, column index) tuple.
+        rh_indexes: A (index, column index) tuple.
 
     Returns:
-        The shape (row, col) shape of the product.
+        The index (index, column index) of the product.
     """
-    if lh_shape == (1, 1):
-        return rh_shape
-    elif rh_shape == (1, 1):
-        return lh_shape
-    else:
+    if lh_indexes[0] is None and lh_indexes[1] is None:
+        return rh_indexes
+    elif rh_indexes[0] is None and rh_indexes[1] is None:
+        return lh_indexes
+    else: # TODO implement dynamic reindexing
         if lh_shape[1] != rh_shape[0]:
             raise ValueError("Incompatible dimensions %s %s" % (
                 lh_shape, rh_shape))

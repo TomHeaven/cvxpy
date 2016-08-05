@@ -51,6 +51,12 @@ class mul_elemwise(AffAtom):
         """
         return u.shape.sum_shapes([arg.size for arg in self.args])
 
+    def index_from_args(self):
+        """Returns the index and columns of the expression.
+        """
+        return u.index.sum_indexes([(arg.index, arg.columns)
+                                  for arg in self.args])
+
     def sign_from_args(self):
         """Same as times.
         """

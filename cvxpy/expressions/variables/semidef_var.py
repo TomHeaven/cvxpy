@@ -19,29 +19,23 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy.expressions.constants.constant import Constant
 from cvxpy.expressions.variables.variable import Variable
-from cvxpy.expressions.variables.symmetric import upper_tri_to_full
+from cvxpy.expressions.variables.symmetric import SymmetricUpperTri, upper_tri_to_full
 from cvxpy.constraints.semidefinite import SDP
 from cvxpy.expressions import cvxtypes
 import cvxpy.lin_ops.lin_utils as lu
-import scipy.sparse as sp
+import pandas as pd ## TODO dynamic import
 
 def Semidef(n, name=None):
     """An expression representing a positive semidefinite matrix.
     """
     var = SemidefUpperTri(n, name)
+    if not isinstance(n, (int, long)): # we believe it is a legit 1D array-like
+        n = len(n)
     fill_mat = Constant(upper_tri_to_full(n))
-    return cvxtypes.reshape()(fill_mat*var, n, n)
+    return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
 
-class SemidefUpperTri(Variable):
+class SemidefUpperTri(SymmetricUpperTri):
     """ The upper triangular part of a positive semidefinite variable. """
-    def __init__(self, n, name=None):
-        self.n = n
-        super(SemidefUpperTri, self).__init__(n*(n+1)//2, 1, name)
-
-    def get_data(self):
-        """Returns info needed to reconstruct the expression besides the args.
-        """
-        return [self.n, self.name]
 
     def canonicalize(self):
         """Variable must be semidefinite and symmetric.
@@ -54,7 +48,3 @@ class SemidefUpperTri(Variable):
         full_mat = lu.reshape(full_mat, (self.n, self.n))
         return (upper_tri, [SDP(full_mat, enforce_sym=False)])
 
-    def __repr__(self):
-        """String to recreate the object.
-        """
-        return "SemidefUpperTri(%d)" % self.n

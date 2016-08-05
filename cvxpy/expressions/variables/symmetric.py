@@ -23,11 +23,14 @@ from cvxpy.constraints.semidefinite import SDP
 from cvxpy.expressions import cvxtypes
 import cvxpy.lin_ops.lin_utils as lu
 import scipy.sparse as sp
+import pandas as pd ## TODO dynamic import
 
 def Symmetric(n, name=None):
     """An expression representing a positive semidefinite matrix.
     """
     var = SymmetricUpperTri(n, name)
+    if not isinstance(n, (int, long)): # we believe it is a legit 1D array-like
+        n = len(n)
     fill_mat = Constant(upper_tri_to_full(n))
     return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
 
@@ -72,7 +75,13 @@ class SymmetricUpperTri(Variable):
     """ The upper triangular part of a symmetric variable. """
     def __init__(self, n, name=None):
         self.n = n
-        super(SymmetricUpperTri, self).__init__(n*(n+1)//2, 1, name)
+        self._sq_mat_index = None
+
+        if not isinstance(n, (int, long)):  # we believe it is a legit 1D array-like
+            self._sq_mat_index = pd.Index(n)
+            self.n = len(n)
+
+        super(SymmetricUpperTri, self).__init__(self.n*(self.n+1)//2, 1, name)
 
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.
@@ -86,4 +95,5 @@ class SymmetricUpperTri(Variable):
     def __repr__(self):
         """String to recreate the object.
         """
-        return "SymmetricUpperTri(%d)" % self.n
+        return "%s(n=%d)" % (self.__class__.__name__,
+                             self._sq_mat_index if self._sq_mat_index is not None else self.n)
