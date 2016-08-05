@@ -113,7 +113,7 @@ class Constant(Leaf):
     def __repr__(self):
         """Returns a string with information about the expression.
         """
-        return "%s(%s, %s, %s)" % (self.__class__.__name__,
+        return "%s(%s, %s, (%s))" % (self.__class__.__name__,
                                    self.curvature,
                                    self.sign,
                                    self._repr_size_index())
