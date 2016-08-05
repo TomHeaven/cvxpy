@@ -55,8 +55,9 @@ class mul_elemwise(AffAtom):
     def index_from_args(self):
         """Returns the index and columns of the expression.
         """
-        return u.index.sum_indexes([(arg.index, arg.columns)
-                                  for arg in self.args])
+        return u.index.mul_indexes((args[0].index, args[0].columns),
+                                   (args[1].index, args[1].columns),
+                                  args[0].size, args[1].size)
 
     def sign_from_args(self):
         """Same as times.

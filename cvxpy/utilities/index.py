@@ -44,23 +44,34 @@ def sum_indexes(indexs_columns):
     return (None if len(indexes) == 0 else indexes[0], 
             None if len(columns) == 0 else columns[0])
 
-def mul_indexes(lh_indexes, rh_indexes):
+def mul_indexes(lh_indexes, rh_indexes, lh_shape, rh_shape):
     """Give the columns and row index resulting from multiplying
     two column and row indexes.
 
     Args:
         lh_indexes: A (index, column index) tuple.
         rh_indexes: A (index, column index) tuple.
+        lh_shape: A (row, col) tuple.
+        rh_shape: A (row, col) tuple.
+
+        If one of the two expressions is a scalar, return
+        the indexes of the other. (Without checking that unit lenght indexes match.)
+
+        If the expressions are matrices check that the internal
+        dimension has the same index. (TODO reindex dynamically.)
 
     Returns:
         The index (index, column index) of the product.
     """
-    if lh_indexes[0] is None and lh_indexes[1] is None:
+    if lh_shape == (1, 1):
         return rh_indexes
-    elif rh_indexes[0] is None and rh_indexes[1] is None:
+    elif rh_shape == (1, 1):
         return lh_indexes
-    else: # TODO implement dynamic reindexing
-        if lh_shape[1] != rh_shape[0]:
-            raise ValueError("Incompatible dimensions %s %s" % (
-                lh_shape, rh_shape))
-        return (lh_shape[0], rh_shape[1])
+    elif lh_indexes[1] is None \
+     or rh_indexes[0] is None \
+     or lh_indexes[1].equals(rh_indexes[0]):
+        # TODO implement dynamic reindexing
+        return (lh_indexes[0], rh_indexes[1])
+    else:
+        raise ValueError("Incompatible indexes %s %s" % (
+            lh_indexes, rh_indexes))

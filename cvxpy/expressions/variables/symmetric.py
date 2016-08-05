@@ -29,8 +29,10 @@ def Symmetric(n, name=None):
     """An expression representing a symmetric matrix.
     """
     var = SymmetricUpperTri(n, name)
-    if not isinstance(n, (int, long)): # we believe it is a legit 1D array-like
+    try:
         n = len(n)
+    except TypeError:
+        pass
     fill_mat = Constant(upper_tri_to_full(n))
     return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
 
@@ -77,12 +79,13 @@ class SymmetricUpperTri(Variable):
     """ The upper triangular part of a symmetric variable. """
 
     def __init__(self, n, name=None):
-        self.n = n
-        self._sq_mat_index = None
 
-        if not isinstance(n, (int, long)):  # we believe it is a legit 1D array-like
-            self._sq_mat_index = pd.Index(n)
+        try:
             self.n = len(n)
+            self._sq_mat_index = pd.Index(n)
+        except TypeError:
+            self.n = n
+            self._sq_mat_index = None
 
         super(SymmetricUpperTri, self).__init__(self.n*(self.n+1)//2, 1, name)
 

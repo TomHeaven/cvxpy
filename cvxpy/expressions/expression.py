@@ -206,17 +206,17 @@ class Expression(u.Canonical):
         """
         return NotImplemented
 
-    @abc.abstractproperty
+    @property
     def index(self):
         """Returns the index of the expression (or None).
         """
-        return NotImplemented
+        return self._index
 
-    @abc.abstractproperty
+    @property
     def columns(self):
         """Returns the columns index of the expression (or None).
         """
-        return NotImplemented
+        return self._columns
 
     def is_scalar(self):
         """Is the expression a scalar?

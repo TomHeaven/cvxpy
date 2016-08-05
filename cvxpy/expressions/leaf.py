@@ -93,18 +93,6 @@ class Leaf(expression.Expression):
         # Default is full domain.
         return []
 
-    @property
-    def index(self):
-        """Returns the index of the expression (or None).
-        """
-        return self._index
-
-    @property
-    def columns(self):
-        """Returns the column index of the expression (or None).
-        """
-        return self._columns
-
     def as_series(self): #TODO fix
         """Returns representation of the leaf as pandas Series.
         """
