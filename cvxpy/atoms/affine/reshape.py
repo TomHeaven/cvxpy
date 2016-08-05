@@ -27,6 +27,8 @@ class reshape(AffAtom):
 
     Vectorizes the expression then unvectorizes it into the new shape.
     The entries are stored in column-major order.
+
+    If the original expression had index information, we lose it.
     """
 
     def __init__(self, expr, rows, cols):
@@ -54,6 +56,12 @@ class reshape(AffAtom):
         """Returns the shape from the rows, cols arguments.
         """
         return (self.rows, self.cols)
+
+
+    def index_from_args(self):
+        """Returns the shape from the rows, cols arguments.
+        """
+        return (None, None)
 
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.

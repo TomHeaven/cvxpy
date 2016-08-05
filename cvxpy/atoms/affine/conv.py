@@ -55,6 +55,11 @@ class conv(AffAtom):
         rh_length = self.args[1].size[0]
         return (lh_length + rh_length - 1, 1)
 
+    def index_from_args(self):
+        """Not defined.
+        """
+        return (None, None)
+
     def sign_from_args(self):
         """Same as times.
         """

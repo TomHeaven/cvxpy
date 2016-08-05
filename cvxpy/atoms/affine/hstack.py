@@ -35,6 +35,23 @@ class hstack(AffAtom):
         rows = self.args[0].size[0]
         return (rows, cols)
 
+    def index_from_args(self):
+        indexes = [arg.index for arg in self.args if arg.index is not None]
+        columns = [arg.columns for arg in self.args if arg.index is not None]
+        for index in indexes:
+            if not index.equals(indexes[0]):
+                raise ValueError(
+                    "Incompatible indexes")
+        if len(indexes) == 0:
+            result_index = None
+        else:
+            result_index = indexes[0]
+        if len(columns) < len(self.args):
+            return (result_index, None)
+        else:
+            import pandas as pd
+            return (result_index, pd.Index(np.concatenate(columns)))
+
     # All arguments must have the same height.
     def validate_arguments(self):
         arg_cols = [arg.size[0] for arg in self.args]

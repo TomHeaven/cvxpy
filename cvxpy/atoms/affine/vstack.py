@@ -35,6 +35,23 @@ class vstack(AffAtom):
         rows = sum(arg.size[0] for arg in self.args)
         return (rows, cols)
 
+    def index_from_args(self):
+        indexes = [arg.index for arg in self.args if arg.index is not None]
+        columns = [arg.columns for arg in self.args if arg.index is not None]
+        for column in columns:
+            if not column.equals(columns[0]):
+                raise ValueError(
+                    "Incompatible columns")
+        if len(columns) == 0:
+            result_column = None
+        else:
+            result_column = columns[0]
+        if len(indexes) < len(self.args):
+            return (result_column, None)
+        else:
+            import pandas as pd
+            return (result_column, pd.Index(np.concatenate(indexes)))
+
     # All arguments must have the same width.
     def validate_arguments(self):
         arg_cols = [arg.size[1] for arg in self.args]
