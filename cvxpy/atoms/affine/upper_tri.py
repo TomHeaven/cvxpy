@@ -56,6 +56,11 @@ class upper_tri(AffAtom):
         rows, cols = self.args[0].size
         return (rows*(cols-1)//2, 1)
 
+    def index_from_args(self):
+        """Empty.
+        """
+        return (None, None)
+
     @staticmethod
     def graph_implementation(arg_objs, size, data=None):
         """Vectorized strictly upper triagonal entries.

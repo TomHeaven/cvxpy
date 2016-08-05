@@ -38,17 +38,8 @@ def Semidef(n, name=None):
     return cvxtypes.reshape()(fill_mat*var, n, n)
 
 
-class SemidefUpperTri(Variable):
+class SemidefUpperTri(SymmetricUpperTri):
     """ The upper triangular part of a positive semidefinite variable. """
-
-    def __init__(self, n, name=None):
-        self.n = n
-        super(SemidefUpperTri, self).__init__(n*(n+1)//2, 1, name)
-
-    def get_data(self):
-        """Returns info needed to reconstruct the expression besides the args.
-        """
-        return [self.n, self.name]
 
     def canonicalize(self):
         """Variable must be semidefinite and symmetric.

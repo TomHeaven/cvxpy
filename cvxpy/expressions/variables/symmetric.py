@@ -29,12 +29,11 @@ def Symmetric(n, name=None):
     """An expression representing a symmetric matrix.
     """
     var = SymmetricUpperTri(n, name)
-    try:
-        n = len(n)
+    try: # if n is a pandas index
+        fill_mat = Constant(upper_tri_to_full(len(n)))
     except TypeError:
-        pass
-    fill_mat = Constant(upper_tri_to_full(n))
-    return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
+        fill_mat = Constant(upper_tri_to_full(n))
+    return cvxtypes.reshape()(fill_mat*var, n, n)
 
 
 def upper_tri_to_full(n):
@@ -101,5 +100,5 @@ class SymmetricUpperTri(Variable):
     def __repr__(self):
         """String to recreate the object.
         """
-        return "%s(n=%d)" % (self.__class__.__name__,
+        return "%s(%d)" % (self.__class__.__name__,
                              self._sq_mat_index if self._sq_mat_index is not None else self.n)

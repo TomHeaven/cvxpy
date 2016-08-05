@@ -50,6 +50,10 @@ class kron(AffAtom):
         cols = self.args[0].size[1]*self.args[1].size[1]
         return (rows, cols)
 
+    def index_from_args(self):
+        """We could do cartesian product of the indexes..""" ##TODO
+        return (None, None)
+
     def sign_from_args(self):
         """Same as times.
         """

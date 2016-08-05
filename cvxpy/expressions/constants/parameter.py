@@ -29,6 +29,7 @@ class Parameter(Leaf):
     PARAM_COUNT = 0
 
     def __init__(self, rows=1, cols=1, name=None, sign="unknown", value=None):
+        super(Parameter, self).__init__(rows=rows, cols=cols)
         self.id = lu.get_id()
         self._sign_str = sign
         if name is None:
@@ -39,12 +40,13 @@ class Parameter(Leaf):
         self._value = None
         if value is not None:
             self.value = value
-        super(Parameter, self).__init__(rows=rows, cols=cols)
 
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.
         """
-        return [self._rows, self._cols, self._name, self._sign_str, self.value]
+        return [self._rows if self.index is None else self.index,
+                self._cols if self.columns is None else self.columns,
+                self._name, self._sign_str, self.value]
 
     def name(self):
         return self._name

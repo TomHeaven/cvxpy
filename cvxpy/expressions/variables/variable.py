@@ -60,7 +60,9 @@ class Variable(Leaf):
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.
         """
-        return [self._rows, self._cols, self.index, self.columns, self._name]
+        return [self._rows if self.index is None else self.index,
+                self._cols if self.columns is None else self.columns,
+                self._name]
 
     def name(self):
         return self._name

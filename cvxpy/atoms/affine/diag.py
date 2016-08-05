@@ -72,6 +72,10 @@ class diag_vec(AffAtom):
         rows, _ = self.args[0].size
         return (rows, rows)
 
+    def index_from_args(self):
+        """Use index of vector."""
+        return (self.args[0].index, self.args[0].index)
+
     @staticmethod
     def graph_implementation(arg_objs, size, data=None):
         """Convolve two vectors.
@@ -115,6 +119,10 @@ class diag_mat(AffAtom):
         """
         rows, _ = self.args[0].size
         return (rows, 1)
+
+    def index_from_args(self):
+        """Use index of matrix."""
+        return (self.args[0].index, None)
 
     @staticmethod
     def graph_implementation(arg_objs, size, data=None):

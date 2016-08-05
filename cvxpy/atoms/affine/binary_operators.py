@@ -63,7 +63,7 @@ class MulExpression(BinaryOperator):
         return u.shape.mul_shapes(self.args[0].size, self.args[1].size)
 
     def index_from_args(self):
-        """Returns the (row, col) size of the expression.
+        """Returns the (row, col) index of the expression.
         """
         return u.index.mul_indexes((self.args[0].index, self.args[0].columns),
                                    (self.args[1].index, self.args[1].columns),
@@ -159,6 +159,11 @@ class DivExpression(BinaryOperator):
         """Returns the (row, col) size of the expression.
         """
         return self.args[0].size
+
+    def index_from_args(self):
+        """Returns the (row, col) index of the expression.
+        """
+        return (self.args[0].index, self.args[0].columns)
 
     def is_incr(self, idx):
         """Is the composition non-decreasing in argument idx?
