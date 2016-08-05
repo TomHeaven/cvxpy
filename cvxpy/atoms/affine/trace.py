@@ -24,6 +24,7 @@ import numpy as np
 
 
 class trace(AffAtom, ScalarAtom):
+
     """The sum of the diagonal entries of a matrix.
 
     Attributes

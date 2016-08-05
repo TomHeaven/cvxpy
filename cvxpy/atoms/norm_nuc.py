@@ -29,7 +29,9 @@ from cvxpy.constraints.semidefinite import SDP
 
 
 class normNuc(ScalarAtom):
+
     """ Sum of the singular values. """
+
     def __init__(self, A):
         super(normNuc, self).__init__(A)
 

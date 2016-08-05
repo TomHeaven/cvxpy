@@ -22,6 +22,7 @@ from cvxpy.atoms.norm_nuc import normNuc
 from cvxpy.atoms.sigma_max import sigma_max
 from cvxpy.atoms.pnorm import pnorm
 
+
 def norm(x, p=2, axis=None):
     """Wrapper on the different norm atoms.
 
@@ -48,7 +49,7 @@ def norm(x, p=2, axis=None):
     elif p == "fro":
         return pnorm(x, 2, axis)
     elif p == 2:
-        if x.is_matrix():
+        if axis is None and x.is_matrix():
             return sigma_max(x)
         else:
             return pnorm(x, 2, axis)

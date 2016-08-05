@@ -17,18 +17,18 @@ You should have received a copy of the GNU General Public License
 along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import cvxpy.utilities as u
 import cvxpy.interface as intf
-import cvxpy.settings as s
 from cvxpy.expressions.leaf import Leaf
 import cvxpy.lin_ops.lin_utils as lu
 import numpy as np
 import pandas as pd ## TODO : optional import
 
+
 class Constant(Leaf):
     """
     A constant, either matrix or scalar.
     """
+
     def __init__(self, value):
         # TODO HACK.
         # A fix for c.T*x where c is a 1D array.
@@ -59,6 +59,11 @@ class Constant(Leaf):
 
     def name(self):
         return str(self.value)
+
+    def constants(self):
+        """Returns self as a constant.
+        """
+        return [self]
 
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.

@@ -21,14 +21,15 @@ from cvxpy.atoms.atom import Atom
 from cvxpy.atoms.scalar_atom import ScalarAtom
 import cvxpy.interface as intf
 import cvxpy.lin_ops.lin_utils as lu
-from cvxpy.atoms.affine.sum_entries import sum_entries
 import numpy as np
 import scipy.sparse as sp
 
 
 class sum_largest(ScalarAtom):
+
     """Sum of the largest k values in the matrix X.
     """
+
     def __init__(self, x, k):
         self.k = k
         super(sum_largest, self).__init__(x)

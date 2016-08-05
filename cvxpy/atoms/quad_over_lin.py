@@ -27,9 +27,11 @@ import scipy.sparse as sp
 import scipy as scipy
 
 class quad_over_lin(ScalarAtom):
+
     """ :math:`(sum_{ij}X^2_{ij})/y`
 
     """
+
     def __init__(self, x, y):
         super(quad_over_lin, self).__init__(x, y)
 
@@ -125,7 +127,7 @@ class quad_over_lin(ScalarAtom):
             (LinOp for objective, list of constraints)
         """
         x = arg_objs[0]
-        y = arg_objs[1] # Known to be a scalar.
+        y = arg_objs[1]  # Known to be a scalar.
         v = lu.create_var((1, 1))
         two = lu.create_const(2, (1, 1))
         constraints = [SOC(lu.sum_expr([y, v]),

@@ -25,6 +25,7 @@ from cvxpy.expressions import cvxtypes
 import cvxpy.lin_ops.lin_utils as lu
 import pandas as pd ## TODO dynamic import
 
+
 def Semidef(n, name=None):
     """An expression representing a positive semidefinite matrix.
     """
@@ -34,8 +35,18 @@ def Semidef(n, name=None):
     fill_mat = Constant(upper_tri_to_full(n))
     return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
 
-class SemidefUpperTri(SymmetricUpperTri):
+
+class SemidefUpperTri(Variable):
     """ The upper triangular part of a positive semidefinite variable. """
+
+    def __init__(self, n, name=None):
+        self.n = n
+        super(SemidefUpperTri, self).__init__(n*(n+1)//2, 1, name)
+
+    def get_data(self):
+        """Returns info needed to reconstruct the expression besides the args.
+        """
+        return [self.n, self.name]
 
     def canonicalize(self):
         """Variable must be semidefinite and symmetric.

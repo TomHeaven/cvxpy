@@ -19,20 +19,21 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy.expressions.constants.constant import Constant
 from cvxpy.expressions.variables.variable import Variable
-from cvxpy.constraints.semidefinite import SDP
 from cvxpy.expressions import cvxtypes
 import cvxpy.lin_ops.lin_utils as lu
 import scipy.sparse as sp
 import pandas as pd ## TODO dynamic import
 
+
 def Symmetric(n, name=None):
-    """An expression representing a positive semidefinite matrix.
+    """An expression representing a symmetric matrix.
     """
     var = SymmetricUpperTri(n, name)
     if not isinstance(n, (int, long)): # we believe it is a legit 1D array-like
         n = len(n)
     fill_mat = Constant(upper_tri_to_full(n))
     return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
+
 
 def upper_tri_to_full(n):
     """Returns a coefficient matrix to create a symmetric matrix.
@@ -71,8 +72,10 @@ def upper_tri_to_full(n):
     return sp.coo_matrix((val_arr, (row_arr, col_arr)),
                          (n*n, entries)).tocsc()
 
+
 class SymmetricUpperTri(Variable):
     """ The upper triangular part of a symmetric variable. """
+
     def __init__(self, n, name=None):
         self.n = n
         self._sq_mat_index = None

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='cvxpy',
-    version='0.4.1',
+    version='0.4.2',
     author='Steven Diamond, Eric Chu, Stephen Boyd',
     author_email='stevend2@stanford.edu, echu508@stanford.edu, boyd@stanford.edu',
     packages=['cvxpy',
@@ -24,7 +24,7 @@ setup(
               'cvxpy.transforms',
               'cvxpy.utilities'],
     package_dir={'cvxpy': 'cvxpy'},
-        url='http://github.com/cvxgrp/cvxpy/',
+    url='http://github.com/cvxgrp/cvxpy/',
     license='GPLv3',
     zip_safe=False,
     description='A domain-specific language for modeling convex optimization problems in Python.',

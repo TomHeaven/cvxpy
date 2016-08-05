@@ -22,3 +22,5 @@ from . import grad
 from . import shape
 from . import sign
 from . import index
+from .quadratic import QuadCoeffExtractor
+
