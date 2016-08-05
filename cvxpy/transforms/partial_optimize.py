@@ -128,6 +128,14 @@ class PartialProblem(Expression):
         """
         return (1, 1)
 
+    @property
+    def index(self):
+        return None
+
+    @property
+    def columns(self):
+        return None
+
     def name(self):
         """Returns the string representation of the expression.
         """
