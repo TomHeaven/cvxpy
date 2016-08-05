@@ -30,7 +30,6 @@ class Parameter(Leaf):
 
     def __init__(self, rows=1, cols=1, name=None, sign="unknown", value=None):
         self.id = lu.get_id()
-        self._size_index_from_args(rows, cols)
         self._sign_str = sign
         if name is None:
             self._name = "%s%d" % (s.PARAM_PREFIX, self.id)
@@ -40,7 +39,7 @@ class Parameter(Leaf):
         self._value = None
         if value is not None:
             self.value = value
-        super(Parameter, self).__init__()
+        super(Parameter, self).__init__(rows=rows, cols=cols)
 
     def get_data(self):
         """Returns info needed to reconstruct the expression besides the args.

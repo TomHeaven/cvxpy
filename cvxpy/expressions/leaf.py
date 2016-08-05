@@ -21,7 +21,7 @@ import abc
 from cvxpy.expressions import expression
 import cvxpy.interface as intf
 import numpy as np
-import pandas as pd  # TODO : global import check
+import pandas as pd  # TODO : global import check, we could do dynamic import
 
 
 class Leaf(expression.Expression):
@@ -31,7 +31,33 @@ class Leaf(expression.Expression):
 
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self):
+    def __init__(self, rows, cols):
+        """
+        Size and index for user-defined expressions (variables, parameters)
+
+        Parameters
+        ----------
+        rows : number of rows of the expression, or iterable for pandas indexing
+        cols : number of columns of the expression, or iterable for pandas indexing
+
+        Returns
+        -------
+
+        """
+        try:
+            self._index = pd.Index(rows)
+            self._rows = len(self._index)
+        except TypeError:
+            self._rows = rows
+            self._index = None
+
+        try:
+            self._columns = pd.Index(cols)
+            self._cols = len(self._columns)
+        except TypeError:
+            self._cols = cols
+            self._columns = None
+
         self.args = []
 
     def variables(self):
@@ -67,40 +93,6 @@ class Leaf(expression.Expression):
         # Default is full domain.
         return []
 
-    def _size_index_from_args(self, rows, cols):
-        """
-        Size and index for user-defined expressions (variables, parameters)
-
-        Parameters
-        ----------
-        rows : number of rows of the expression, or iterable for pandas indexing
-        cols : number of columns of the expression, or iterable for pandas indexing
-
-        Returns
-        -------
-
-        """
-        if isinstance(rows, (int, long)):
-            self._rows = rows
-            self._index = None
-            if isinstance(cols, (int, long)):
-                self._cols = cols
-                self._columns = None
-            else:
-                raise SyntaxError("Only integer columns are compatible with integer rows.")
-        else:
-            self._index = pd.Index(rows)
-            self._rows = len(self._index)
-            if isinstance(cols, (int, long)):
-                if cols == 1:
-                    self._cols = 1
-                    self._columns = None
-                else:
-                    raise SyntaxError("Only single or indexed columns are compatible with indexed rows.")
-            else:
-                self._columns = pd.Index(cols)
-                self._cols = len(self._columns)
-
     @property
     def index(self):
         """Returns the index of the expression (or None).
@@ -113,16 +105,16 @@ class Leaf(expression.Expression):
         """
         return self._columns
 
-    def as_series(self):
+    def as_series(self): #TODO fix
         """Returns representation of the leaf as pandas Series.
         """
-        if self.index is None:
+        if self.index is None :
             raise SyntaxError("%s has no index" % self.__class__.__name__)
         if self.columns is not None:
             raise SyntaxError("%s has columns, use .as_dataframe()" % self.__class__.__name__)
         return pd.Series(index=self.index, data=self.value)
 
-    def as_dataframe(self):
+    def as_dataframe(self): #TODO fix
         """Returns representation of the leaf as pandas DataFrame.
         """
         if self.columns is None:

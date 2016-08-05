@@ -33,14 +33,13 @@ class Variable(Leaf):
     # columns - labels of columns
 
     def __init__(self, rows=1, cols=1, name=None):
-        self._size_index_from_args(rows, cols)
         self.id = lu.get_id()
         if name is None:
             self._name = "%s%d" % (s.VAR_PREFIX, self.id)
         else:
             self._name = name
         self.primal_value = None
-        super(Variable, self).__init__()
+        super(Variable, self).__init__(rows, cols)
 
     def is_positive(self):
         """Is the expression positive?

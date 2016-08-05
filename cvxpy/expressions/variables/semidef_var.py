@@ -29,11 +29,13 @@ import pandas as pd ## TODO dynamic import
 def Semidef(n, name=None):
     """An expression representing a positive semidefinite matrix.
     """
+    try:
+        n = len(n) #TODO pass index
+    except TypeError:
+        pass
     var = SemidefUpperTri(n, name)
-    if not isinstance(n, (int, long)): # we believe it is a legit 1D array-like
-        n = len(n)
     fill_mat = Constant(upper_tri_to_full(n))
-    return cvxtypes.reshape()(fill_mat*var, int(n), int(n))
+    return cvxtypes.reshape()(fill_mat*var, n, n)
 
 
 class SemidefUpperTri(Variable):

@@ -55,7 +55,7 @@ class Constant(Leaf):
         # Set DCP attributes.
         self._size = intf.size(self.value)
         self._is_pos, self._is_neg = intf.sign(self.value)
-        super(Constant, self).__init__()
+        super(Constant, self).__init__(*self.size) # TODO fix
 
     def name(self):
         return str(self.value)

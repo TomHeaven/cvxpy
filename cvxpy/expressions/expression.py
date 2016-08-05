@@ -94,19 +94,19 @@ class Expression(u.Canonical):
         """
         result = ""
         if self.index is None:
-            result += "rows=%d, " % self.size[0]
+            result += "%d, " % self.size[0]
         else:
-            result += "rows=%s, " % self.index
+            result += "%s, " % self.index
         if self.columns is None:
-            result += "cols=%d" % self.size[1]
+            result += "%d" % self.size[1]
         else:
-            result += "cols=%s" % self.columns
+            result += "%s" % self.columns
         return result
 
     def __repr__(self):
         """Returns a string with information about the expression.
         """
-        return "Expression(%s, %s, %s)" % (self.curvature,
+        return "Expression(%s, %s, (%s))" % (self.curvature,
                                            self.sign,
                                            self._repr_size_index())
 
