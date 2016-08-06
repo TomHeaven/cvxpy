@@ -51,7 +51,7 @@ class kron(AffAtom):
         return (rows, cols)
 
     def index_from_args(self):
-        """We could do cartesian product of the indexes..""" ##TODO
+        """We could do cartesian product of the indexes.."""  # TODO
         return (None, None)
 
     def sign_from_args(self):

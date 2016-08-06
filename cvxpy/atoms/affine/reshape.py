@@ -57,7 +57,6 @@ class reshape(AffAtom):
         """
         return (self.rows, self.cols)
 
-
     def index_from_args(self):
         """Returns the shape from the rows, cols arguments.
         """

@@ -46,7 +46,6 @@ class transpose(AffAtom):
         columns = self.args[0].columns
         return (columns, index)
 
-
     @staticmethod
     def graph_implementation(arg_objs, size, data=None):
         """Create a new variable equal to the argument transposed.

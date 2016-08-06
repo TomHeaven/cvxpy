@@ -94,10 +94,10 @@ class Leaf(expression.Expression):
         # Default is full domain.
         return []
 
-    def as_series(self): #TODO fix
+    def as_series(self):  # TODO fix
         """Returns representation of the leaf as pandas Series.
         """
-        if self.index is None :
+        if self.index is None:
             raise SyntaxError("%s has no index" % self.__class__.__name__)
         if self.columns is not None:
             raise SyntaxError("%s has columns, use .as_dataframe()" % self.__class__.__name__)
@@ -107,8 +107,7 @@ class Leaf(expression.Expression):
         except ImportError:
             raise SyntaxError("Pandas not installed")
 
-
-    def as_dataframe(self): #TODO fix
+    def as_dataframe(self):  # TODO fix
         """Returns representation of the leaf as pandas DataFrame.
         """
         if self.columns is None:
@@ -119,7 +118,6 @@ class Leaf(expression.Expression):
                                 columns=self.columns, data=self.value)
         except ImportError:
             raise SyntaxError("Pandas not installed")
-
 
     def _validate_value(self, val):
         """Check that the value satisfies the leaf's symbolic attributes.
@@ -146,8 +144,7 @@ class Leaf(expression.Expression):
             # All signs are valid if sign is unknown.
             # Otherwise value sign must match declared sign.
             pos_val, neg_val = intf.sign(val)
-            if self.is_positive() and not pos_val or \
-                            self.is_negative() and not neg_val:
+            if self.is_positive() and not pos_val or self.is_negative() and not neg_val:
                 raise ValueError(
                     "Invalid sign for %s value." % self.__class__.__name__
                 )

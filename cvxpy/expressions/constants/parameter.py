@@ -105,5 +105,5 @@ class Parameter(Leaf):
         """String to recreate the object.
         """
         return '%s(%s, sign="%s")' % (self.__class__.__name__,
-                                         self._repr_size_index(),
-                                                 self.sign)
+                                      self._repr_size_index(),
+                                      self.sign)

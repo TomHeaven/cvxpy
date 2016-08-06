@@ -17,18 +17,19 @@ You should have received a copy of the GNU General Public License
 along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+
 def sum_indexes(indexs_columns):
     """Give the indexes resulting from summing a list of indexes.
 
     Args:
-        shapes: A list of (index, columns) tuples.
+        indexs_columns: A list of (index, columns) tuples.
 
     If one variable has the right size, but misses index or columns,
     we accept it. If two variables have a index or columns, we require
     that they are the same.
 
     Returns:
-        The (index, columns) of the sum. 
+        The (index, columns) of the sum.
     """
     indexes = [el[0] for el in indexs_columns if el[0] is not None]
     columns = [el[1] for el in indexs_columns if el[1] is not None]
@@ -41,8 +42,9 @@ def sum_indexes(indexs_columns):
             raise ValueError(
                 "Incompatible column indexes")
     # TODO implement dynamic reindexing
-    return (None if len(indexes) == 0 else indexes[0], 
+    return (None if len(indexes) == 0 else indexes[0],
             None if len(columns) == 0 else columns[0])
+
 
 def mul_indexes(lh_indexes, rh_indexes, lh_shape, rh_shape):
     """Give the columns and row index resulting from multiplying
@@ -68,8 +70,8 @@ def mul_indexes(lh_indexes, rh_indexes, lh_shape, rh_shape):
     elif rh_shape == (1, 1):
         return lh_indexes
     elif lh_indexes[1] is None \
-     or rh_indexes[0] is None \
-     or lh_indexes[1].equals(rh_indexes[0]):
+            or rh_indexes[0] is None \
+            or lh_indexes[1].equals(rh_indexes[0]):
         # TODO implement dynamic reindexing
         return (lh_indexes[0], rh_indexes[1])
     else:

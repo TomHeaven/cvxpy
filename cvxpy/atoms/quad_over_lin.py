@@ -19,12 +19,12 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy.atoms.atom import Atom
 from cvxpy.atoms.scalar_atom import ScalarAtom
-import cvxpy.utilities as u
 import cvxpy.lin_ops.lin_utils as lu
 from cvxpy.constraints.second_order import SOC
 import numpy as np
 import scipy.sparse as sp
 import scipy as scipy
+
 
 class quad_over_lin(ScalarAtom):
 

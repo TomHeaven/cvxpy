@@ -28,6 +28,7 @@ import numpy as np
 from numpy import linalg as LA
 import scipy.sparse as sp
 
+
 class log_det(ScalarAtom):
 
     """:math:`\log\det A`

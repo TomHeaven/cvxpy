@@ -18,7 +18,6 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 from cvxpy.expressions.constants.constant import Constant
-from cvxpy.expressions.variables.variable import Variable
 from cvxpy.expressions.variables.symmetric import SymmetricUpperTri, upper_tri_to_full
 from cvxpy.constraints.semidefinite import SDP
 from cvxpy.expressions import cvxtypes
@@ -29,7 +28,7 @@ def Semidef(n, name=None):
     """An expression representing a positive semidefinite matrix.
     """
     try:
-        n = len(n) #TODO pass index
+        n = len(n)  # TODO pass index
     except TypeError:
         pass
     var = SemidefUpperTri(n, name)
@@ -50,4 +49,3 @@ class SemidefUpperTri(SymmetricUpperTri):
         full_mat = lu.mul_expr(fill_coeff, upper_tri, (self.n*self.n, 1))
         full_mat = lu.reshape(full_mat, (self.n, self.n))
         return (upper_tri, [SDP(full_mat, enforce_sym=False)])
-

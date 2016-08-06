@@ -26,6 +26,7 @@ from numpy import linalg as LA
 import numpy as np
 import scipy.sparse as sp
 
+
 class matrix_frac(ScalarAtom):
 
     """ tr X.T*P^-1*X """

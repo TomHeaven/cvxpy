@@ -26,6 +26,7 @@ import scipy.sparse as sp
 from numpy import linalg as LA
 import numpy as np
 
+
 class sigma_max(ScalarAtom):
 
     """ Maximum singular value. """

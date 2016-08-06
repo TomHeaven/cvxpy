@@ -47,7 +47,7 @@ class AddExpression(AffAtom):
         """Returns the index and columns of the expression.
         """
         return u.index.sum_indexes([(arg.index, arg.columns)
-                                  for arg in self.args])
+                                    for arg in self.args])
 
     def expand_args(self, expr):
         """Helper function to extract the arguments from an AddExpression.

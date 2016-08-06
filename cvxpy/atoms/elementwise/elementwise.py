@@ -37,7 +37,7 @@ class Elementwise(Atom):
     def index_from_args(self):
         """Index is the same as the sum of the arguments.
         """
-        return u.index.sum_indexes([(arg.index, arg.columns) 
+        return u.index.sum_indexes([(arg.index, arg.columns)
                                     for arg in self.args])
 
     def validate_arguments(self):

@@ -53,7 +53,7 @@ class index(AffAtom):
     def index_from_args(self):
         """Returns the row and column indexes of the index expression.
         """
-        return (None, None) ##TODO implement pandas indexing
+        return (None, None)  # TODO implement pandas indexing
 
     def get_data(self):
         """Returns the (row slice, column slice).

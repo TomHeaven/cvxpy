@@ -38,7 +38,7 @@ class Constant(Leaf):
             import pandas as pd
         except ImportError:
             pass
-        if 'pd' in dir() and isinstance(value, pd.DataFrame): # TODO find better way
+        if 'pd' in dir() and isinstance(value, pd.DataFrame):  # TODO find better way
             self._index = value.index
             self._columns = value.columns
             self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
@@ -58,7 +58,7 @@ class Constant(Leaf):
         # Set DCP attributes.
         self._size = intf.size(self.value)
         self._is_pos, self._is_neg = intf.sign(self.value)
-        super(Constant, self).__init__(*self.size) # TODO fix
+        super(Constant, self).__init__(*self.size)  # TODO fix
 
     def name(self):
         return str(self.value)
@@ -117,6 +117,6 @@ class Constant(Leaf):
         """Returns a string with information about the expression.
         """
         return "%s(%s, %s, (%s))" % (self.__class__.__name__,
-                                   self.curvature,
-                                   self.sign,
-                                   self._repr_size_index())
+                                     self.curvature,
+                                     self.sign,
+                                     self._repr_size_index())

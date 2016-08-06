@@ -51,7 +51,7 @@ class AxisAtom(Atom):
             return (None, None)
         elif self.axis == 0:
             return (None, self.args[0].columns)
-        else: # axis == 1.
+        else:  # axis == 1.
             return (self.args[0].index, None)
 
     def get_data(self):

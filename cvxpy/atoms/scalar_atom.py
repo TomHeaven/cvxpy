@@ -19,6 +19,7 @@ along with CVXPY.  If not, see <http://www.gnu.org/licenses/>.
 
 from cvxpy.atoms.atom import Atom
 
+
 class ScalarAtom(Atom):
     """ Base class for scalar atoms. """
 
@@ -31,6 +32,3 @@ class ScalarAtom(Atom):
         """Returns the index and column index of the expression.
         """
         return (None, None)
-
-
-

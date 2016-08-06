@@ -28,4 +28,3 @@ class Int(Variable):
         """
         obj, constr = super(Int, self).canonicalize()
         return (obj, constr + [IntConstr(obj)])
-

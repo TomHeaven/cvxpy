@@ -26,6 +26,7 @@ from scipy import linalg as LA
 import numpy as np
 import scipy.sparse as sp
 
+
 class lambda_max(ScalarAtom):
 
     """ Maximum eigenvalue; :math:`\lambda_{\max}(A)`.
