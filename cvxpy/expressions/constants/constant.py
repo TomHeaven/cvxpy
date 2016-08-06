@@ -34,31 +34,33 @@ class Constant(Leaf):
         self.is_1D_array = False
         self._index = None
         self._columns = None
-        try:
-            import pandas as pd
-        except ImportError:
-            pass
-        if 'pd' in dir() and isinstance(value, pd.DataFrame):  # TODO find better way
-            self._index = value.index
-            self._columns = value.columns
-            self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
-        elif 'pd' in dir() and isinstance(value, pd.Series):
-            self._index = value.index
-            self.is_1D_array = True
-            self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
-        # Keep sparse matrices sparse.
-        elif intf.is_sparse(value):
+        if intf.is_sparse(value):
             self._value = intf.DEFAULT_SPARSE_INTF.const_to_matrix(value)
             self._sparse = True
         else:
+            self._sparse = False
             if isinstance(value, np.ndarray) and len(value.shape) == 1:
                 self.is_1D_array = True
-            self._value = intf.DEFAULT_INTF.const_to_matrix(value)
-            self._sparse = False
+            try:
+                import pandas as pd
+                if isinstance(value, pd.Series):
+                    self._index = value.index
+                    self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
+                    self.is_1D_array = True
+                elif isinstance(value, pd.DataFrame):
+                    self._index = value.index
+                    self._columns = value.columns
+                    self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
+                else:
+                    self._value = intf.DEFAULT_INTF.const_to_matrix(value)
+            except ImportError:
+                self._value = intf.DEFAULT_INTF.const_to_matrix(value)
         # Set DCP attributes.
-        self._size = intf.size(self.value)
         self._is_pos, self._is_neg = intf.sign(self.value)
-        super(Constant, self).__init__(*self.size)  # TODO fix
+        self._size = intf.size(self.value)
+        rows, cols = self._size
+        super(Constant, self).__init__(self._index if self._index is not None else rows,
+                                       self._columns if self._columns is not None else cols)
 
     def name(self):
         return str(self.value)
