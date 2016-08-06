@@ -22,7 +22,6 @@ from cvxpy.expressions.variables.variable import Variable
 from cvxpy.expressions import cvxtypes
 import cvxpy.lin_ops.lin_utils as lu
 import scipy.sparse as sp
-import pandas as pd ## TODO dynamic import
 
 
 def Symmetric(n, name=None):
@@ -81,7 +80,7 @@ class SymmetricUpperTri(Variable):
 
         try:
             self.n = len(n)
-            self._sq_mat_index = pd.Index(n)
+            self._sq_mat_index = n
         except TypeError:
             self.n = n
             self._sq_mat_index = None

@@ -21,7 +21,6 @@ import cvxpy.interface as intf
 from cvxpy.expressions.leaf import Leaf
 import cvxpy.lin_ops.lin_utils as lu
 import numpy as np
-import pandas as pd ## TODO : optional import
 
 
 class Constant(Leaf):
@@ -35,11 +34,15 @@ class Constant(Leaf):
         self.is_1D_array = False
         self._index = None
         self._columns = None
-        if isinstance(value, pd.DataFrame):
+        try:
+            import pandas as pd
+        except ImportError:
+            pass
+        if 'pd' in dir() and isinstance(value, pd.DataFrame): # TODO find better way
             self._index = value.index
             self._columns = value.columns
             self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)
-        elif isinstance(value, pd.Series):
+        elif 'pd' in dir() and isinstance(value, pd.Series):
             self._index = value.index
             self.is_1D_array = True
             self._value = intf.DEFAULT_INTF.const_to_matrix(value.values)

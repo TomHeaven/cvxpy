@@ -21,7 +21,6 @@ import abc
 from cvxpy.expressions import expression
 import cvxpy.interface as intf
 import numpy as np
-import pandas as pd  # TODO : global import check, we could do dynamic import
 
 
 class Leaf(expression.Expression):
@@ -45,16 +44,18 @@ class Leaf(expression.Expression):
 
         """
         try:
+            import pandas as pd
             self._index = pd.Index(rows)
             self._rows = len(self._index)
-        except TypeError:
+        except (TypeError, ImportError):
             self._rows = rows
             self._index = None
 
         try:
+            import pandas as pd
             self._columns = pd.Index(cols)
             self._cols = len(self._columns)
-        except TypeError:
+        except (TypeError, ImportError):
             self._cols = cols
             self._columns = None
 
@@ -100,15 +101,25 @@ class Leaf(expression.Expression):
             raise SyntaxError("%s has no index" % self.__class__.__name__)
         if self.columns is not None:
             raise SyntaxError("%s has columns, use .as_dataframe()" % self.__class__.__name__)
-        return pd.Series(index=self.index, data=self.value)
+        try:
+            import pandas as pd
+            return pd.Series(index=self.index, data=self.value)
+        except ImportError:
+            raise SyntaxError("Pandas not installed")
+
 
     def as_dataframe(self): #TODO fix
         """Returns representation of the leaf as pandas DataFrame.
         """
         if self.columns is None:
             raise SyntaxError("%s has no column index." % self.__class__.__name__)
-        return pd.DataFrame(index=self.index,
-                            columns=self.columns, data=self.value)
+        try:
+            import pandas as pd
+            return pd.DataFrame(index=self.index,
+                                columns=self.columns, data=self.value)
+        except ImportError:
+            raise SyntaxError("Pandas not installed")
+
 
     def _validate_value(self, val):
         """Check that the value satisfies the leaf's symbolic attributes.

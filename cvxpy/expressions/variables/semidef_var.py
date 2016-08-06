@@ -23,7 +23,6 @@ from cvxpy.expressions.variables.symmetric import SymmetricUpperTri, upper_tri_t
 from cvxpy.constraints.semidefinite import SDP
 from cvxpy.expressions import cvxtypes
 import cvxpy.lin_ops.lin_utils as lu
-import pandas as pd ## TODO dynamic import
 
 
 def Semidef(n, name=None):
