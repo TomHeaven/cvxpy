@@ -111,6 +111,62 @@ class Expression(u.Canonical):
                                              self.sign,
                                              self._repr_size_index())
 
+    def as_series(self):
+        """Returns representation of the expression as pandas Series.
+        """
+        try:
+            import pandas as pd
+        except ImportError:
+            raise SyntaxError("Pandas needs to be installed to use this feature.")
+
+        if self.index is not None and self.columns is not None:
+            raise SyntaxError("%s has both index and columns, use .as_dataframe()" %
+                              self.__class__.__name__)
+
+        elif self.index is not None and self.columns is None:
+            if self.cols == 1:
+                return pd.Series(index=self.index, data=self.value)
+            else:
+                raise SyntaxError("%s has no column index." % self.__class__.__name__)
+
+        elif self.columns is not None and self.index is None:
+            if self.rows == 1:
+                return pd.Series(index=self.columns, data=self.value)
+            else:
+                raise SyntaxError("%s has no index." % self.__class__.__name__)
+
+        else:
+            raise SyntaxError("%s has no index or columns information" % self.__class__.__name__)
+
+    def as_dataframe(self):
+        """Returns representation of the leaf as pandas DataFrame.
+        """
+        try:
+            import pandas as pd
+        except ImportError:
+            raise SyntaxError("Pandas needs to be installed to use this feature.")
+
+        if self.index is not None and self.columns is not None:
+            return pd.DataFrame(index=self.index,
+                                columns=self.columns, data=self.value)
+
+        elif self.index is not None and self.columns is None:
+            if self.cols == 1:
+                raise SyntaxError("%s has only index, use .as_series()" %
+                                  self.__class__.__name__)
+            else:
+                raise SyntaxError("%s has no column index." % self.__class__.__name__)
+
+        elif self.columns is not None and self.index is None:
+            if self.rows == 1:
+                raise SyntaxError("%s has only column index, use .as_series()" %
+                                  self.__class__.__name__)
+            else:
+                raise SyntaxError("%s has no index." % self.__class__.__name__)
+
+        else:
+            raise SyntaxError("%s has no index or columns information" % self.__class__.__name__)
+
     @abc.abstractmethod
     def name(self):
         """Returns the string representation of the expression.

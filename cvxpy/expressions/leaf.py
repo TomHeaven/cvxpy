@@ -21,6 +21,7 @@ import abc
 from cvxpy.expressions import expression
 import cvxpy.interface as intf
 import numpy as np
+import numbers
 
 
 class Leaf(expression.Expression):
@@ -43,21 +44,31 @@ class Leaf(expression.Expression):
         -------
 
         """
-        try:
-            import pandas as pd
-            self._index = pd.Index(rows)
-            self._rows = len(self._index)
-        except (TypeError, ImportError):
+        if isinstance(rows, numbers.Integral):
             self._rows = rows
             self._index = None
+        else:
+            try:
+                import pandas as pd
+                self._index = pd.Index(rows)
+                self._rows = len(self._index)
+            except ImportError:
+                raise ImportError("Expression indexing requires pandas installed.")
+            except TypeError:
+                raise SyntaxError("Expression rows must be integer or iterable.")
 
-        try:
-            import pandas as pd
-            self._columns = pd.Index(cols)
-            self._cols = len(self._columns)
-        except (TypeError, ImportError):
+        if isinstance(cols, numbers.Integral):
             self._cols = cols
             self._columns = None
+        else:
+            try:
+                import pandas as pd
+                self._columns = pd.Index(cols)
+                self._cols = len(self._columns)
+            except ImportError:
+                raise ImportError("Expression indexing requires pandas installed.")
+            except TypeError:
+                raise SyntaxError("Expression columns must be integer or iterable.")
 
         self.args = []
 
@@ -93,31 +104,6 @@ class Leaf(expression.Expression):
         """
         # Default is full domain.
         return []
-
-    def as_series(self):  # TODO fix
-        """Returns representation of the leaf as pandas Series.
-        """
-        if self.index is None:
-            raise SyntaxError("%s has no index" % self.__class__.__name__)
-        if self.columns is not None:
-            raise SyntaxError("%s has columns, use .as_dataframe()" % self.__class__.__name__)
-        try:
-            import pandas as pd
-            return pd.Series(index=self.index, data=self.value)
-        except ImportError:
-            raise SyntaxError("Pandas not installed")
-
-    def as_dataframe(self):  # TODO fix
-        """Returns representation of the leaf as pandas DataFrame.
-        """
-        if self.columns is None:
-            raise SyntaxError("%s has no column index." % self.__class__.__name__)
-        try:
-            import pandas as pd
-            return pd.DataFrame(index=self.index,
-                                columns=self.columns, data=self.value)
-        except ImportError:
-            raise SyntaxError("Pandas not installed")
 
     def _validate_value(self, val):
         """Check that the value satisfies the leaf's symbolic attributes.
