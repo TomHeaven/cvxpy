@@ -83,11 +83,11 @@ class TestLeaves(BaseTest):
         if not self.pandas_present:
             return
         import pandas as pd
-        self.assert_(self.x.index.equals(self.times))
-        self.assert_(self.x.columns.equals(pd.Index(self.labels)))
-        self.assert_(self.y.index.equals(pd.Index(self.labels)))
+        self.assertTrue(self.x.index.equals(self.times))
+        self.assertTrue(self.x.columns.equals(pd.Index(self.labels)))
+        self.assertTrue(self.y.index.equals(pd.Index(self.labels)))
         self.assertIs(self.y.columns, None)
-        self.assert_(self.z.index.equals(self.times))
+        self.assertTrue(self.z.index.equals(self.times))
         self.assertIs(self.z.columns, None)
 
     def test_parameters_basic(self):
@@ -95,9 +95,9 @@ class TestLeaves(BaseTest):
         if not self.pandas_present:
             return
         import pandas as pd
-        self.assert_(self.a.index.equals(self.times))
-        self.assert_(self.a.columns.equals(pd.Index(self.range_num)))
-        self.assert_(self.b.columns.equals(pd.Index(self.range_num)))
+        self.assertTrue(self.a.index.equals(self.times))
+        self.assertTrue(self.a.columns.equals(pd.Index(self.range_num)))
+        self.assertTrue(self.b.columns.equals(pd.Index(self.range_num)))
         self.assertIs(self.b.index, None)
 
     def test_constants_basic(self):
@@ -106,9 +106,9 @@ class TestLeaves(BaseTest):
             return
         import pandas as pd
         self.assertIs(self.c_const.columns, None)
-        self.assert_(self.c_const.index.equals(pd.Index(self.labels)))
-        self.assert_(self.D_const.index.equals(pd.Index(self.range_num)))
-        self.assert_(self.D_const.columns.equals(self.times))
+        self.assertTrue(self.c_const.index.equals(pd.Index(self.labels)))
+        self.assertTrue(self.D_const.index.equals(pd.Index(self.range_num)))
+        self.assertTrue(self.D_const.columns.equals(self.times))
 
 
 
